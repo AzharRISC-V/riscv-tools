@@ -15,10 +15,10 @@
 	url = https://github.com/riscv/riscv-gnu-toolchain.git
 [submodule "riscv-openocd"]
 	path = riscv-openocd
-	url = https://github.com/jrrk/riscv-openocd.git
+	url = https://github.com/lowRISC/riscv-openocd.git
 [submodule "riscv-pk"]
 	path = riscv-pk
-	url = https://github.com/jrrk/riscv-pk.git
+	url = https://github.com/lowRISC/riscv-pk.git
 [submodule "riscv-tests"]
 	path = riscv-tests
 	url = https://github.com/riscv/riscv-tests.git
