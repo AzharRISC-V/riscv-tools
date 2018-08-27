@@ -15,6 +15,24 @@ LINUX_CFG=$TOP/riscv-tools/vmlinux_config
 if [ -z "$FPGA_BOARD" ]; then LOWRISC=$TOP/fpga/board/nexys4_ddr
 else LOWRISC=$TOP/fpga/board/$FPGA_BOARD; fi
 
+cat > /tmp/init1 <<EOF
+#!/bin/busybox ash
+/bin/busybox --install -s
+mount -t proc proc /proc
+mount -t sysfs none /sys
+mount -t devtmpfs none /dev
+sleep 2
+echo Mounting SD root
+mkdir /dos
+mount -t msdos /dev/mmcblk0p1 /dos || (echo Mount failed, dropping to ash; /bin/ash)
+cd /dos
+flash_eraseall -j /dev/mtd0
+dd if=cfgmem.bin of=/dev/mtd0 bs=1M
+dd if=/dev/mtd0 of=readback.bin bs=1M
+cmp cfgmem.bin readback.bin || (echo Compare failed, dropping to ash; /bin/ash)
+
+exec /sbin/init
+EOF
 
 CDIR=$PWD
 
@@ -26,7 +44,7 @@ if [ -d "$BUSYBOX" ] && [ -d "$LINUX" ]; then
     mkdir ramfs && cd ramfs &&
     mkdir -p bin etc dev lib proc sbin sys tmp usr usr/bin usr/lib usr/sbin &&
     cp "$BUSYBOX"/busybox bin/ &&
-    ln -s bin/busybox ./init &&
+    cp /tmp/init1 ./init && chmod +x ./init &&
     cp $ROOT_INITTAB etc/inittab &&
     echo "\
         mknod dev/null c 1 3 && \
